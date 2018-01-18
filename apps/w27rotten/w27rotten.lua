@@ -105,20 +105,22 @@ function player:update()
 	map:set(3, 4, 1)
 	map:set(2, 3, 1)
 	player.dy = player.dy + 0.01
-	if -- Not really doing much right now
-	true
+	if
+	map:get(player.x + (player.dx * 3) + (sign(player.dx) * 0.1), player.y - 0.5) == 0 and
+	map:get(player.x + (player.dx * 3) + (sign(player.dx) * 0.1), player.y - 0.2) == 0 and
+	map:get(player.x + (player.dx * 3) + (sign(player.dx) * 0.1), player.y - 1) == 0
 	then
 		player.x = player.x + player.dx
 	end
 	if
-	map:get(player.x - 0.5, player.y + player.dy) == 0 and
-	map:get(player.x + 0.5, player.y) == 0 and
-	map:get(player.x + 0.5, player.y + (player.dy - 1)) == 0 and
-	map:get(player.x - 0.5, player.y + (player.dy - 1)) == 0
+	map:get(player.x - 0.3, player.y + player.dy) == 0 and
+	map:get(player.x + 0.3, player.y) == 0 and
+	map:get(player.x + 0.3, player.y + (player.dy - 1)) == 0 and
+	map:get(player.x - 0.3, player.y + (player.dy - 1)) == 0
 	then
 		player.y = player.y + player.dy
 	else
-		player.dy = 0
+		player.dy = -0.01
 	end
 end
 
@@ -148,7 +150,11 @@ function game:tick()
 		player.dx = player.dx + (1 / 8)
 	end
 	if hw.btn('up') then
-		if map:get(player.x, player.y + 0.3) ~= 0 then
+		if
+		map:get(player.x, player.y + 0.4) ~= 0 or
+		map:get(player.x, player.y + 0.1) ~= 0 or
+		map:get(player.x, player.y) ~= 0
+		then
 			player.dy = -0.21
 		end
 	end
