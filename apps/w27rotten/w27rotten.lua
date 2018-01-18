@@ -78,19 +78,26 @@ end
 
 --function map:isSolid(()
 
-for i = 0, 5 do
-	map:set(i + 1, 5, 1)
+for i = 0, 7 do
+	for j = 0, i do
+		map:set(7 - i + 1, 7 - j + 3, 1)
+	end
+	for j = 0, i do
+		map:set(i + 20, 7 - j + 3, 1)
+	end
+	map:set(7 - i + 10, 10, 1)
 end
 
 for _ = 0, 30 do
 	local x, y = math.random(0,60), math.random(0,60)
 	for i = 0, 5 do
-		map:set(x + i + 5, y + 5, 1)
+		map:set(x + i, y + 10, 1)
 	end
 end
 
 player = {
 	x = 3, y = 2,
+	halfwidth = 0.3, height = 0.6,
 	dx = 0, dy = 0,
 }
 
@@ -101,34 +108,59 @@ function sign(n)
 end
 
 function player:update()
-	map:set(3, 3, 1)
-	map:set(3, 4, 1)
-	map:set(2, 3, 1)
-	player.dy = player.dy + 0.01
+	self.dx = 0
+	if hw.btn('left') then
+		self.dx = self.dx - (1 / 8)
+	end
+	if hw.btn('right') then
+		self.dx = self.dx + (1 / 8)
+	end
+	if hw.btn('up') then
+		if map:get(self.x, self.y + 0.3) ~= 0 then
+			self.dy = -0.21
+		end
+	end
+
+	-- gravity
+	self.dy = self.dy + 0.01
+
+	-- x collsions
 	if
+		--true
 	map:get(player.x + (player.dx * 3) + (sign(player.dx) * 0.1), player.y - 0.5) == 0 and
 	map:get(player.x + (player.dx * 3) + (sign(player.dx) * 0.1), player.y - 0.2) == 0 and
 	map:get(player.x + (player.dx * 3) + (sign(player.dx) * 0.1), player.y - 1) == 0
+	--map:get(self.x - self.halfwidth + self.dx, self.y) == 0 and
+	--map:get(self.x + self.halfwidth + self.dx, self.y) == 0-- and
 	then
-		player.x = player.x + player.dx
+		self.x = self.x + self.dx
 	end
+
+	-- y collisions
 	if
 	map:get(player.x - 0.3, player.y + player.dy) == 0 and
 	map:get(player.x + 0.3, player.y) == 0 and
 	map:get(player.x + 0.3, player.y + (player.dy - 1)) == 0 and
 	map:get(player.x - 0.3, player.y + (player.dy - 1)) == 0
+	--[[
+	map:get(self.x - self.halfwidth, self.y + self.dy) == 0 and
+	map:get(self.x + self.halfwidth, self.y) == 0 and
+	map:get(self.x + self.halfwidth, self.y + (self.dy - self.height)) == 0 and
+	map:get(self.x - self.halfwidth, self.y + (self.dy - self.height)) == 0
+	--]]
 	then
-		player.y = player.y + player.dy
+		self.y = self.y + self.dy
 	else
-		player.dy = -0.01
+		self.dy = -0.01
+		--self.y = math.floor(self.y)
 	end
 end
 
 function player:draw()
 	draw.setColor('Yellow')
-	local x, y = screen.w / 2 - camera.x + (player.x * 8), screen.h / 2 - camera.y + (player.y * 8)
+	local x, y = screen.w / 2 - camera.x + (self.x * 8), screen.h / 2 - camera.y + (self.y * 8)
 	draw.rect(x - 3, y - 10, 6, 10)
-	draw.setColor('Red')
+	--draw.setColor('Red')
 end
 
 camera = {
@@ -142,22 +174,6 @@ function game:tick()
 	draw.cls()
 	draw.setColor('Black')
 
-	player.dx = 0
-	if hw.btn('left') then
-		player.dx = player.dx - (1 / 8)
-	end
-	if hw.btn('right') then
-		player.dx = player.dx + (1 / 8)
-	end
-	if hw.btn('up') then
-		if
-		map:get(player.x, player.y + 0.4) ~= 0 or
-		map:get(player.x, player.y + 0.1) ~= 0 or
-		map:get(player.x, player.y) ~= 0
-		then
-			player.dy = -0.21
-		end
-	end
 	player:update()
 
 	camera.x = ease(camera.x, player.x * 8, 8) - 0.5
