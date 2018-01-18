@@ -90,19 +90,43 @@ for _ = 0, 30 do
 end
 
 player = {
-	x = 24, y = 24,
+	x = 3, y = 2,
 	dx = 0, dy = 0,
 }
 
+function sign(n)
+	if n > 0 then return  1 end
+	if n < 0 then return -1 end
+	return 0
+end
+
 function player:update()
-	player.x = player.x + player.dx
-	player.y = player.y + player.dy
+	map:set(3, 3, 1)
+	map:set(3, 4, 1)
+	map:set(2, 3, 1)
+	player.dy = player.dy + 0.01
+	if -- Not really doing much right now
+	true
+	then
+		player.x = player.x + player.dx
+	end
+	if
+	map:get(player.x - 0.5, player.y + player.dy) == 0 and
+	map:get(player.x + 0.5, player.y) == 0 and
+	map:get(player.x + 0.5, player.y + (player.dy - 1)) == 0 and
+	map:get(player.x - 0.5, player.y + (player.dy - 1)) == 0
+	then
+		player.y = player.y + player.dy
+	else
+		player.dy = 0
+	end
 end
 
 function player:draw()
 	draw.setColor('Yellow')
-	local x, y = screen.w / 2 - camera.x + player.x, screen.h / 2 - camera.y + player.y
+	local x, y = screen.w / 2 - camera.x + (player.x * 8), screen.h / 2 - camera.y + (player.y * 8)
 	draw.rect(x - 3, y - 10, 6, 10)
+	draw.setColor('Red')
 end
 
 camera = {
@@ -118,14 +142,20 @@ function game:tick()
 
 	player.dx = 0
 	if hw.btn('left') then
-		player.dx = player.dx - 1
-	elseif hw.btn('right') then
-		player.dx = player.dx + 1
+		player.dx = player.dx - (1 / 8)
+	end
+	if hw.btn('right') then
+		player.dx = player.dx + (1 / 8)
+	end
+	if hw.btn('up') then
+		if map:get(player.x, player.y + 0.3) ~= 0 then
+			player.dy = -0.21
+		end
 	end
 	player:update()
 
-	camera.x = ease(camera.x, player.x, 8) - 0.5
-	camera.y = ease(camera.y, player.y, 8) - 0.5 --fixme
+	camera.x = ease(camera.x, player.x * 8, 8) - 0.5
+	camera.y = ease(camera.y, player.y * 8, 8) - 0.5 --fixme
 	map.drawx = camera.x / 8 - screen.w / 16
 	map.drawy = camera.y / 8 - screen.h / 16
 	map:draw(
